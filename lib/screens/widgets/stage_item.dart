@@ -27,98 +27,113 @@ class _StageItemState extends State<StageItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        width: 50,
-        height: 50,
-        decoration: const BoxDecoration(
-          color: Colors.black12,
-          shape: BoxShape.circle,
-        ),
-        child: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (uid != widget.model.uid && widget.fromDirectorScreen)
-                GestureDetector(
-                  onTap: () {
-                    Provider.of<AgoraEngineController>(context, listen: false)
-                        .demoteToLobbyUser(widget.model.uid, true);
-                  },
-                  child: const Icon(
-                    Icons.arrow_downward,
-                  ),
-                ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                constraints: const BoxConstraints(
-                  maxHeight: 15,
-                ),
-                width: 55,
-                child: Text(
-                  widget.model.name,
-                  // maxLines: 1,
-                ),
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+    return Consumer<AgoraEngineController>(
+      builder: (BuildContext context, value, Widget? child) => Expanded(
+        child: Container(
+          width: 50,
+          height: 50,
+          decoration: const BoxDecoration(
+            color: Colors.black12,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (uid != widget.model.uid && widget.fromDirectorScreen)
                   GestureDetector(
                     onTap: () {
-                      if (widget.model.uid == uid) {
-                        Provider.of<AgoraEngineController>(context,
-                                listen: false)
-                            .leaveCall(context);
-                      } else {
-                        Provider.of<AgoraEngineController>(context,
-                                listen: false)
-                            .removeAUser(uid: widget.model.uid);
-                      }
+                      Provider.of<AgoraEngineController>(context, listen: false)
+                          .demoteToLobbyUser(widget.model.uid, true);
                     },
                     child: const Icon(
-                      Icons.call_end,
-                      color: Colors.red,
+                      Icons.arrow_downward,
                     ),
                   ),
-                  const SizedBox(
-                    width: 10,
+                const SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  constraints: const BoxConstraints(
+                    maxHeight: 15,
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      if (widget.model.uid == uid) {
-                        setState(() {
-                          muted = !muted;
-                          print(muted);
-                        });
-                        Provider.of<AgoraEngineController>(context,
-                                listen: false)
-                            .toggleLocalAudioMute(muted);
-                      } else {
-                        Provider.of<AgoraEngineController>(context,
-                                listen: false)
-                            .toggleUserAudio(
-                                uid: widget.model.uid, muted: muted);
-                      }
-                    },
-                    child: widget.model.uid == uid
-                        ? Icon(
-                            muted ? Icons.mic_off : Icons.mic,
-                            color: Colors.blue,
-                          )
-                        : Icon(
-                            widget.model.muted ? Icons.mic_off : Icons.mic,
-                            color: Colors.blue,
-                          ),
+                  width: 55,
+                  child: Text(
+                    widget.model.name,
+                    // maxLines: 1,
                   ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(
+                  height: 5,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        if (widget.model.uid == uid) {
+                          // await  Provider.of<AgoraEngineController>(context,
+                          //       listen: false).sendMessage('left', widget.model.uid);
+                          Provider.of<AgoraEngineController>(context,
+                                  listen: false)
+                              .leaveCall(context, widget.model.uid);
+                        } else {
+                          Provider.of<AgoraEngineController>(context,
+                                  listen: false)
+                              .removeAUser(uid: widget.model.uid);
+                        }
+                      },
+                      child: const Icon(
+                        Icons.call_end,
+                        color: Colors.red,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        if (widget.model.uid == uid) {
+                          setState(() {
+                            muted = !muted;
+                            print(muted);
+                          });
+                          Provider.of<AgoraEngineController>(context,
+                                  listen: false)
+                              .updateUserAudio(
+                                  uid: widget.model.uid, muted: muted);
+                          Provider.of<AgoraEngineController>(context,
+                                  listen: false)
+                              .toggleLocalAudioMute(muted);
+                        } else if (widget.fromDirectorScreen) {
+                          setState(() {
+                            muted = !muted;
+                            print(muted);
+                          });
+                          Provider.of<AgoraEngineController>(context,
+                                  listen: false)
+                              .toggleUserAudio(
+                                  uid: widget.model.uid, muted: muted);
+                        }
+                      },
+                      child:
+                          widget.model.uid == uid && widget.fromDirectorScreen
+                              ? Icon(
+                                  muted ? Icons.mic_off : Icons.mic,
+                                  color: Colors.blue,
+                                )
+                              : Icon(
+                                  value.stageUsers['${widget.model.uid}']!.muted
+                                      ? Icons.mic_off
+                                      : Icons.mic,
+                                  color: Colors.blue,
+                                ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

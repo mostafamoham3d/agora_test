@@ -59,7 +59,7 @@ class _LobbyItemState extends State<LobbyItem> {
                 ),
                 width: 55,
                 child: Text(
-                  widget.model.uid.toString(),
+                  widget.model.name,
                   // maxLines: 1,
                 ),
               ),
@@ -74,7 +74,7 @@ class _LobbyItemState extends State<LobbyItem> {
                       if (widget.model.uid == uid) {
                         Provider.of<AgoraEngineController>(context,
                                 listen: false)
-                            .leaveCall(context);
+                            .leaveCall(context, widget.model.uid);
                       } else {
                         Provider.of<AgoraEngineController>(context,
                                 listen: false)

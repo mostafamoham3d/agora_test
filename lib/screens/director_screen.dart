@@ -26,7 +26,7 @@ class _DirectorScreenState extends State<DirectorScreen> {
   void initState() {
     Future.delayed(Duration.zero, () async {
       Provider.of<AgoraEngineController>(context, listen: false)
-          .joinStageAsADirector(widget.channelName, uid);
+          .joinStageAsADirector(widget.channelName, uid, widget.name);
     });
     super.initState();
   }
@@ -35,11 +35,19 @@ class _DirectorScreenState extends State<DirectorScreen> {
   Widget build(BuildContext context) {
     return Consumer<AgoraEngineController>(
       builder: (context, provider, child) => Scaffold(
+        bottomSheet: const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: 'Enter a message',
+            ),
+          ),
+        ),
         appBar: AppBar(
           leading: IconButton(
             onPressed: () {
               Provider.of<AgoraEngineController>(context, listen: false)
-                  .leaveCall(context);
+                  .leaveCall(context, widget.uid);
               Navigator.of(context).pop();
             },
             icon: const Icon(
@@ -47,82 +55,105 @@ class _DirectorScreenState extends State<DirectorScreen> {
             ),
           ),
         ),
-        body: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 8,
-          ),
-          child: Center(
-            child: Column(
-              children: [
-                const Text(
-                  'Stage',
-                  style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                SizedBox(
-                  height: 200,
-                  child: GridView.builder(
-                      itemCount: 12,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                              crossAxisCount: 4),
-                      itemBuilder: (context, index) {
-                        if (index < provider.stageUsers.length) {
-                          return StageItem(
-                            model: provider.stageUsers.values.toList()[index],
-                            fromDirectorScreen: true,
-                          );
-                        } else {
-                          return const CircleAvatar(
-                            radius: 25,
-                            child: Text('Add user'),
-                          );
-                        }
-                      }),
-                ),
-                const Divider(
-                  thickness: 2,
-                ),
-                const Text(
-                  'Lobby',
-                  style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                SizedBox(
-                  height: 200,
-                  child: provider.lobbyUsers.isNotEmpty
-                      ? GridView.builder(
-                          itemCount: provider.lobbyUsers.length,
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisSpacing: 10,
-                                  mainAxisSpacing: 10,
-                                  crossAxisCount: 4),
-                          itemBuilder: (context, index) {
-                            return LobbyItem(
-                              model: provider.lobbyUsers.values.toList()[index],
+        body: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
+            child: Center(
+              child: Column(
+                children: [
+                  const Text(
+                    'Stage',
+                    style: TextStyle(
+                        fontSize: 24,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  SizedBox(
+                    height: 200,
+                    child: GridView.builder(
+                        itemCount: 12,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                crossAxisCount: 4),
+                        itemBuilder: (context, index) {
+                          if (index < provider.stageUsers.length) {
+                            return StageItem(
+                              model: provider.stageUsers.values.toList()[index],
                               fromDirectorScreen: true,
                             );
-                          },
-                        )
-                      : const Center(
-                          child: Text('No users'),
-                        ),
-                ),
-              ],
+                          } else {
+                            return const CircleAvatar(
+                              radius: 25,
+                              child: Text('Add user'),
+                            );
+                          }
+                        }),
+                  ),
+                  const Divider(
+                    thickness: 2,
+                  ),
+                  const Text(
+                    'Lobby',
+                    style: TextStyle(
+                        fontSize: 24,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  SizedBox(
+                    height: 100,
+                    child: provider.lobbyUsers.isNotEmpty
+                        ? GridView.builder(
+                            itemCount: provider.lobbyUsers.length,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisSpacing: 10,
+                                    mainAxisSpacing: 10,
+                                    crossAxisCount: 4),
+                            itemBuilder: (context, index) {
+                              return LobbyItem(
+                                model:
+                                    provider.lobbyUsers.values.toList()[index],
+                                fromDirectorScreen: true,
+                              );
+                            },
+                          )
+                        : const Center(
+                            child: Text('No users'),
+                          ),
+                  ),
+                  SizedBox(
+                    height: 200,
+                    child: provider.messages.isNotEmpty
+                        ? ListView.builder(
+                            itemCount: provider.messages.length,
+                            itemBuilder: (context, index) {
+                              return Row(
+                                children: [
+                                  Text(provider.messages[index].name),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(provider.messages[index].msg),
+                                ],
+                              );
+                            })
+                        : Center(
+                            child: Text('No messages'),
+                          ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
